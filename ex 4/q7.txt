@@ -1,0 +1,25 @@
+// inputs
+movi 1, 0x7fff
+nop
+movi 2, 0x7fff
+nop
+
+// prepare registers for carry verification (See q5, same logic)
+movi 3, 0x8000
+nop
+movi 4, 0xffff
+nop
+
+// mask R1
+nand 5, 3, 1
+// mask R2
+nand 6, 3, 1
+
+// if both R1, R2, MSB is 1 then carry flag = 1.
+beq 4, 5, else
+beq 4, 6, else
+movi 4, 1
+beq 0, 0, endif
+else: movi 4, 0
+endif: add 3, 1, 2
+halt
