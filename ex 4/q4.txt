@@ -1,20 +1,9 @@
-// In order to shift the register we just multiply the content by 0xf.
+// In order to shift a bit to the right we just add
+// R5 to R5.
 
-// load a number in R5
-movi 5, 0xffea
+movi 5, 0x8fff
 nop
 
-// make a copy of R5 on R4
-sw 5, 0, 0          
-lw 4, 0, 0 
-
-// initialize counter R3 on f
-addi 3, 3, 0xf
-
-// add R4 to R5 f times.
-loop: beq 3, 0, end
-add 5, 5, 4
-addi 3, 3, -1       // decrease counter
-beq 0, 0, loop
+add 5, 5, 5
 
 end: halt
