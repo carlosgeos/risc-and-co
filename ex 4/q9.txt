@@ -1,27 +1,33 @@
-	movi 1, 0x8
-	nop
-	movi 2, 0x4
-	nop
-	movi 6, 0xffff
-	nop
-	movi 4, 0x8000
-	nop
-	
-	movi 7, 0x1
-	nop
+		movi 1, 0x8
+		//nop
+		movi 2, 0x4
+		//nop
+		
+		// load mask LSB into memory address 0
+		movi 6, 0x1
+		nop
+		sw 6, 0, 0
 
-loop: 	beq 7, 4, end
-	nand 5, 1, 7	
-	beq 5, 6, zero
+		// load R5 <- R1
+		add 5, 1, 0
 
-one:	add 5, 1, 0
-	beq 0, 0, next
+loop: 	movi 7, 0x8000
+		beq 7, 6, end
+		nand 7, 2, 6
+		movi 6, 0xffff
+		beq 7, 6, next
 
-zero: 	movi 5, 0x0
-	nop
+one:	add 3, 3, 5
+		beq 0, 0, next
 
-next: 	add 3, 3, 5
-	add 7, 7, 7
-	beq 0, 0, loop
+next:   lw 6, 0, 0
+		add 6, 6, 6
+		sw 6, 0, 0
+
+		// shift R5 for further calculus
+		add 5, 5, 5
+		
+		beq 0, 0, loop
 
 end:	halt
+halt
