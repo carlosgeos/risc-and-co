@@ -1,27 +1,27 @@
-// inputs
-movi 1, 0x0002
-//nop
+	movi 1, 0x8
+	nop
+	movi 2, 0x4
+	nop
+	movi 6, 0xffff
+	nop
+	movi 4, 0x8000
+	nop
+	
+	movi 7, 0x1
+	nop
 
-movi 2, 0x0008
-//nop
+loop: 	beq 7, 4, end
+	nand 5, 1, 7	
+	beq 5, 6, zero
 
-// FIRST CASE: when some of the input registers is 0 then the answer will be 0
-beq 1, 0, end_0
-beq 2, 0, end_0
-beq 0, 0, continue
+one:	add 5, 1, 0
+	beq 0, 0, next
 
-end_0: movi 3, 0
-nop
-movi 4, 0
-nop
-beq 0, 0, end
+zero: 	movi 5, 0x0
+	nop
 
-// SECOND CASE: when there is no carry to the 17th bit
-continue: add 3, 1, 0
-addi 2, 2, -1
-loop: beq 2, 0, end
-add 3, 3, 1
-addi 2, 2, -1
-beq 0, 0, loop
+next: 	add 3, 3, 5
+	add 7, 7, 7
+	beq 0, 0, loop
 
-end: halt
+end:	halt
