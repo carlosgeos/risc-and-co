@@ -1,33 +1,108 @@
-		movi 1, 0x8
-		//nop
-		movi 2, 0x4
-		//nop
-		
-		// load mask LSB into memory address 0
-		movi 6, 0x1
-		nop
-		sw 6, 0, 0
+movi 1, 0x1ff
+	//nop
+	movi 2, 0x1ff
+	//nop
 
-		// load R5 <- R1
-		add 5, 1, 0
+	// initialize memory for bit management of 16 MBS of result multiplication
+	movi 6, 0x0
+	nop
+	sw 6, 0, 0x2
+	
+	// load mask LSB into memory address 0
+	movi 6, 0x1
+	nop
+	sw 6, 0, 0
 
-loop: 	movi 7, 0x8000
-		beq 7, 6, end
-		nand 7, 2, 6
-		movi 6, 0xffff
-		beq 7, 6, next
+	// load R5 <- R1
+	add 5, 1, 0
 
-one:	add 3, 3, 5
-		beq 0, 0, next
+loop: lw 6, 0, 0x0
+	movi 7, 0x8000
+	nop
+	beq 7, 6, end
+	nand 7, 2, 6
+	movi 6, 0xffff
+	nop
+	beq 7, 6, next
+
+one:	beq 0, 0, carry
+sumup:	sw 3, 0, 0x3
+	// save prev res into mem.
+	add 3, 3, 5
+
+	// Calculate next 16 bits
+	lw 6, 0, 0x2
+	add 4, 4, 6
+	lw 7, 0, 0x1
+	beq 7, 0, next
+	addi 4, 4, 0x1
 
 next:   lw 6, 0, 0
-		add 6, 6, 6
-		sw 6, 0, 0
+	add 6, 6, 6
+	sw 6, 0, 0
 
-		// shift R5 for further calculus
-		add 5, 5, 5
-		
-		beq 0, 0, loop
+	
 
-end:	halt
-halt
+	// Update MBS 16 bits operator
+	lw 6, 0, 0x2
+	add 6, 6, 6
+	sw 6, 0, 0x2
+	movi 7, 0x8000
+	nop
+	nand 6, 7, 5
+	movi 7, 0xffff
+
+	// shift R5 for further calculus
+	add 5, 5, 5
+	
+	beq 6, 7, loop
+	// move a 1 to the next 16 bits.
+	lw 6, 0, 0x2
+	addi 6, 6, 0x1
+	sw 6, 0, 0x2
+	beq 0, 0, loop
+end: beq 0, 0, end_1
+cont: beq 0, 0, sumup
+carry: 	movi 7, 0x8000
+	nop
+	nand 7, 3, 7
+	beq 6, 7, n_carry1
+	movi 7, 0x1
+	sw 7, 7, 0
+n_carry1: movi 7, 0x8000
+	nop
+	nand 7, 5, 7
+	beq 6, 7, spec_carry
+	movi 6, 0x1
+	nop
+	lw 7, 6, 0
+	addi 7, 7, 1
+	sw 7, 6, 0
+spec_carry: movi 6, 0x2
+	nop
+	movi 7, 0x1
+	nop
+	lw 7, 7, 0x0
+	beq 6, 7, add_carry
+	movi 6, 0x1
+	nop
+	beq 6, 7, verify
+	beq 0, 0, no_carry
+verify:	add 7, 3, 5
+	movi 6, 0x8000
+	nop
+	nand 7, 7, 6
+	nop
+	movi 6, 0xffff
+	nop
+	beq 6, 7, no_carry
+	beq 0, 0, add_carry
+add_carry: movi 7, 0x1
+	sw 7, 0, 0x1
+	nop
+	beq 0, 0, cont
+no_carry: movi 7, 0x0
+	sw 7, 0, 0x1
+	nop
+	beq 0, 0, cont
+end_1: halt
