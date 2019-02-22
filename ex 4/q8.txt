@@ -21,7 +21,7 @@ movi 7, 0x8000      // mask
 nand 1, 3, 7        // nand a (LSB) with mask
 nand 2, 5, 7        // nand b (LSB) with mask
 
-// add MSB
+// calculate result without carry
 add 4, 6, 4
 add 3, 5, 3
 
