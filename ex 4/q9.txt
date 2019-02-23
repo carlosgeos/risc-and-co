@@ -71,7 +71,7 @@ add_carry: addi 4, 4, 0x1		// sum up 1 to res_msb
 update_info: lw 5, 0, 0x2		// load shifted_a_msb
 lw 6, 0, 0x3					// load shifted_a_lsb
 add 5, 5, 5						// shift shifted_a_msb
-nand 7, 7, 7					// load 0x8000 to R7
+movi 7, 0x8000
 nand 1, 6, 7					// mask shifted_a_lsb
 nand 7, 7, 7
 beq 1, 7, add_one_shift			// if MSB of shifted_a_lsb is 1 then add a one to the shifted value of
