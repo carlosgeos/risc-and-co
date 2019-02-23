@@ -10,29 +10,29 @@
 // If it is the case then increment the result of MSB in 1.
 
 // inputs ignored by server
-movi 4, 0xffff
-movi 3, 0xffff
-movi 6, 0x0
-movi 5, 0x1
+            movi 4, 0xffff
+            movi 3, 0xffff
+            movi 6, 0x0
+            movi 5, 0x1
 
-movi 7, 0x8000      // mask
+            movi 7, 0x8000      // mask
 
 // apply mask in order to know if MSB of a, b, result (LSB) is 1 or 0
-nand 1, 3, 7        // nand a (LSB) with mask
-nand 2, 5, 7        // nand b (LSB) with mask
+            nand 1, 3, 7        // nand a (LSB) with mask
+            nand 2, 5, 7        // nand b (LSB) with mask
 
 // calculate result without carry
-add 4, 6, 4
-add 3, 5, 3
+            add 4, 6, 4
+            add 3, 5, 3
 
 // ----------------------- CARRY CHECK -----------------------------------
-nand 5, 3, 7        // nand result (LSB) with mask
-nand 7, 7, 7        // nand mask with mask
-beq 1, 2, verify
-beq 5, 7, end // It meas that LSB a or LSB b most significant bit is 1 and the LSB result most significant bit is 0.
-beq 0, 0, add_carry
-verify: beq 1, 7, add_carry // both LSB a and LSB b most significant bit is 1
-beq 0, 0, end
-add_carry: addi 4, 4, 0x1 // add carry bit to the result (MSB)
+            nand 5, 3, 7        // nand result (LSB) with mask
+            nand 7, 7, 7        // nand mask with mask
+            beq 1, 2, verify
+            beq 5, 7, end // It meas that LSB a or LSB b most significant bit is 1 and the LSB result most significant bit is 0.
+            beq 0, 0, add_carry
+verify:     beq 1, 7, add_carry // both LSB a and LSB b most significant bit is 1
+            beq 0, 0, end
+add_carry:  addi 4, 4, 0x1 // add carry bit to the result (MSB)
 
-end: halt
+end:        halt
