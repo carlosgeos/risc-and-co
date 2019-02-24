@@ -1,0 +1,90 @@
+// We are going to multiply two numbers which are in register R1 and R2 and put the result in R4 (MSB) and R3 (LSB)
+// 
+// 			R1 	------> called a
+//		  x R2  ------> called b
+//		______
+//		R4  R3  ------> called res_msb res_lsb respectively
+//
+// First, we need to save a copy of R1 into memory, this copy will be left shifted
+// in each iteration, we will call it shifted_a_msb and shifted_a_lsb
+// The idea is to have a dynamic mask, called dynamic_mask which is going to verify bit by bit
+// on R2 and if it is 1 then we are going to add the sifted_a to the previous result.
+// In order to reuse register 1 and 2 we are going to save it into memory.
+// 
+// MEMORY ORGANIZATION:
+// 0x0 -> a
+// 0x1 -> b
+// 0x2 -> shifted_a_msb
+// 0x3 -> shifted_a_lsb
+// 0x4 -> dynamic_mask from 0x0001 to 0x8000
+// 0x5 -> res_msb
+// 0x6 -> res_lsb
+
+// ------------------------- FIRST PART -----------------------------
+// | VERIFY IF ONE OF THE TWO IS 0 THEN RETURN 0                    |
+// ------------------------------------------------------------------
+
+// inputs ignored by server
+                movi 1, 0x3ff
+                movi 2, 0x3ff
+
+
+                beq 1, 0, end
+                beq 2, 0, end
+
+// ------------------------ SECOND PART -----------------------------
+// | MAKE THE MULTIPLICATION BETWEEN a AND b                        |
+// ------------------------------------------------------------------
+
+// Initialize variables according to memory organization diagram above.
+                sw 1, 0, 0x0 	// a
+                sw 2, 0, 0x1 	// b
+                sw 0, 0, 0x2 	// shifted_a_msb
+                sw 1, 0, 0x3 	// shifted_b_msb
+                movi 7, 0x0001	// initialize dynamic_mask
+
+                sw 7, 0, 0x4 	// dynamic_mask
+                sw 0, 0, 0x5 	// res_msb
+                sw 0, 0, 0x6	// res_lsb
+
+main_loop:      nand 5, 2, 7 	// apply dynamic_mask to b
+                nand 7, 7, 7 				// negate mask
+                beq 5, 7, bit_one 			// that bit is one
+                beq 0, 0, update_info		// that bit is zero so do nothing but shift shifted_a_msb and shifted_a_msb
+bit_one:        lw 5, 0, 0x2		// load shifted_a_msb
+                lw 6, 0, 0x3				// load shifted_a_lsb
+                movi 7, 0x8000				// load mask to verify MSB		
+                nand 1, 6, 7				// mask shifted_a_lsb -> R1
+                nand 2, 3, 7				// mask res_lsb		  -> R2
+                add 4, 4, 5					// res_msb = shifted_a_msb + res_msb
+                add 3, 3, 6					// res_lsb = shifted_a_lsb + res_lsb
+
+// carry correction of shifted_a_lsb + res_lsb
+                nand 5, 3, 7					// mask res_lsb(result of sum) -> R5
+                nand 7, 7, 7					// negate mask
+                beq 1, 2, compare				// mask(shifted_a_lsb) == mask(res_lsb)
+                beq 5, 7, update_info			// if the res_lsb calculated MSB is 1 then there is no carry
+                compare: beq 1, 7, add_carry	// both res_lsb and shifted_a_lsb MSB is 1 so add carry
+                beq 0, 0, update_info			// res_lsb and shifted_a_lsb MSB is 0 so no carry
+add_carry:      addi 4, 4, 0x1		// sum up 1 to res_msb
+
+update_info:    lw 5, 0, 0x2		// load shifted_a_msb
+                lw 6, 0, 0x3					// load shifted_a_lsb
+                add 5, 5, 5						// shift shifted_a_msb
+                movi 7, 0x8000
+                nand 1, 6, 7					// mask shifted_a_lsb
+                nand 7, 7, 7
+                beq 1, 7, add_one_shift			// if MSB of shifted_a_lsb is 1 then add a one to the shifted value of
+                beq 0, 0, shift_a_lsb
+                add_one_shift: addi 5, 5, 0x1	// add carry to shifted_a_msb
+                shift_a_lsb: add 6, 6, 6		// carry shifted_a_lsb
+                sw 5, 0, 0x2					// save shifted_a_lsb into memory
+                sw 6, 0, 0x3					// save shifted_a_msb into memory
+                lw 1, 0, 0x0					// reload a
+                lw 2, 0, 0x1					// reload b
+                lw 7, 0, 0x4					// reload dynamic_mask
+                add 7, 7, 7						// shift dynamic_mask
+                sw 7, 0, 0x4					// save it back into the memory
+                beq 7, 0, end
+                beq 0, 0, main_loop
+end:            halt

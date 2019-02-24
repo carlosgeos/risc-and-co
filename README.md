@@ -1,3 +1,3 @@
-# risc-and-co
+# RiSC16 sandbox
 
-RiSC-16 and co.
+Simple arithmetic operations implemented on the [RiSC16](https://ece.umd.edu/~blj/RiSC/) architecture.
