@@ -91,7 +91,7 @@ shift_a_lsb: 	add 6, 6, 6		// carry shifted_a_lsb
 				sw 6, 0, 0x7
 				beq 6, 0, end
 				beq 0, 0, main_loop
-end: 			halt
+end: 			beq 0, 0, end_halt
 nop
 // // ------------------------ SECOND PART ------------------------------------------
 // |  OPTIMIZATION: SELECT THE SMALLER ELEMENT AND OMIT MOST SIGNIFICANT 0S IN CYCLE |
@@ -126,3 +126,4 @@ start: 		lw 1, 0, 0x0				//
 			sw 0, 0, 0x2 	// shifted_a_msb
 			sw 1, 0, 0x3 	// shifted_b_msb
 			beq 0, 0, cont
+end_halt: 	halt
