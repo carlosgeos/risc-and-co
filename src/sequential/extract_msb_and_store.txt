@@ -3,22 +3,22 @@
 // else it will be 1.
 
 // init R1 with some value
-movi 1, 0xffff
-nop
+        movi 1, 0x1234
+        nop
 
 // create mask
-movi 2, 0x8000
-nop
+        movi 2, 0x8000
+        nop
 
 // save 0xffff in R3 to use it later
-movi 3, 0xffff
+        movi 3, 0xffff
 
 // apply mask and save result into R4
-nand 4, 2, 1
+        nand 4, 2, 1
 
 // if result is eq. to 0xffff then R7 <- 1 else R7 <- 0
-if: beq 4, 3, else
-addi 7, 0, 1
-beq 0, 0, endif
-else: addi 7, 0, 0
-endif: halt
+if:     beq 4, 3, else
+addi    7, 0, 1
+beq     0, 0, endif
+else:   addi 7, 0, 0
+endif:  halt

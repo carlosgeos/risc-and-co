@@ -1,0 +1,9 @@
+// In order to shift R5 to the left we simply add R5 to R5.
+// The value shifted in this case is 0x8fff
+
+        movi 5, 0x8fff
+        nop
+
+        add 5, 5, 5
+
+end:    halt

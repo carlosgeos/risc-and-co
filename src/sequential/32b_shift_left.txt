@@ -1,0 +1,21 @@
+// Input on reg5 and reg6
+        movi 6, 0x1234
+        nop
+        movi 5, 0x4321
+        nop
+
+// prepare registers for carry verification, see extract and store logic.
+        movi 2, 0x8000
+        nop
+        movi 3, 0xffff
+        nop
+        nand 4, 2, 5
+
+// Shift both R5, R6 registers
+        add 6, 6, 6
+        add 5, 5, 5
+
+// if carry add one bit at the LSB of R6:
+if:     beq 4, 3, endif
+addi    6, 6, 1
+endif:  halt
