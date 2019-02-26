@@ -1,86 +1,52 @@
 // inputs
-movi 1, 0x0000
-//nop
-movi 2, 0x0001
-//nop
+        movi 1, 0x0000
+        movi 2, 0x8001
 
-// prepare data for carry verification. Use memory address 0, 1
-movi 7, 0x8000
-nop
-sw 7, 0, 0
-movi 7, 0xffff
-nop
-sw 7, 0, 1
+// prepare regs for carry verification
+        movi 7, 0x8000
+        movi 6, 0x7FFE
 
-// Calculates the sum and use save it in memory address 2
-add 7, 1, 2
-sw 7, 0, 2
+// calculates the sum and save it in reg3
+        add 3, 1, 2
 
-// Nand of registers 1, 2 with 0x8000 and save it in memory address 3, 4
-lw 7, 0, 0
-nand 7, 7, 1
-sw 7, 0, 3
-lw 7, 0, 0
-nand 7, 7, 2
-sw 7, 0, 4
+// NAND of registers 1, 2 with 0x8000 mask
+        nand 1, 7, 1
+        nand 2, 7, 2
 
-// Save flag 1 if R1 and R2 MBS is 1. Save it in memory address 5, 6
-// R1
-movi 6, 0xffff
-nop
-lw 7, 0, 3
-beq 6, 7, flagoff_r1
-movi 7, 1
-nop
-beq 0, 0, endflagoff_r1
-flagoff_r1: movi 7, 0
-endflagoff_r1: sw 7, 0, 5
+// check if both MSB are 0 => definitely no carry, end
+        nand 5, 1, 2
+        beq 0, 5, end
 
-// R2
-lw 7, 0, 4
-beq 6, 7, flagoff_r2
-movi 7, 1
-nop
-beq 0, 0, endflagoff_r2
-flagoff_r2: movi 7, 0
-endflagoff_r2: sw 7, 0, 6
+// otherwise, delete bad candidate for carry
+// first check: add the two masks to see if MSBs are 1, 1 or 1, 0
+        add 5, 1, 2
+        beq 5, 6, flag1         // store a bit in memory
 
-// sum up both carries if value is 2 then there is carry
-// if value is 1 then check for MBS = 0
-// else no carry
-// load carry flag of R1 and R2 into R6 and R7
-lw 6, 0, 5
-lw 7, 0, 6
-// load one bit in R5 in order to compare
-add 7, 7, 6
+// second check: is the sum MSB a 1 or a 0 ? If 1, store another bit
+// in memory since it is another indication of a non-carrying candidate
+back1:  nand 7, 7, 3
+        movi 6, 0x7FFF
+        beq 6, 7, flag2
 
-// movi R6 <- 2
-movi 6, 2
+// now load back the bits, if they sum 2, it was a non carrying
+// candidate -> end prematurely.
+back2:  lw 1, 0, 0
+        lw 2, 0, 1
+        add 1, 1, 2
+        movi 2, 2
+        beq 1, 2, end
 
-// if carry sum = 2
-beq 7, 6, carry
-beq 0, 0, continue_1
-carry: movi 4, 1
-beq 0, 0, end
+// add carry by default if not terminated earlier
+default:movi 4, 1
 
-// move R6 <- 1
-continue_1: movi 6, 1
-nop
+done:   beq 0, 0, end
 
-//if carry sum = 1
-beq 7, 6, carry_1_verifier
-beq 0, 0, no_carry
-// load sum in R5
-carry_1_verifier: lw 5, 0, 2
-// mask
-movi 6, 0x8000
-nop
-nand 6, 6, 5
-movi 5, 0xffff
-nop
-beq 6, 5, carry
-beq 0, 0, no_carry
+// subroutines accessed with jumps:
+flag1:  movi 1, 1
+        sw 1, 0, 0
+        beq 0, 0, back1
 
-no_carry: movi 4, 0
-end: lw 3, 0, 2
-halt
+flag2:  sw 1, 0, 1
+        beq 0, 0, back2
+
+end:    halt
