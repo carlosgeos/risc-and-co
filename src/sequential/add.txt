@@ -20,19 +20,17 @@
 // otherwise, delete bad candidate for carry
 // first check: add the two masks to see if MSBs are 1, 1 or 1, 0
         add 5, 1, 2
-        beq 5, 6, flag1         // store a bit in memory
+        beq 5, 6, flag1
 
 // second check: is the sum MSB a 1 or a 0 ? If 1, store another bit
-// in memory since it is another indication of a non-carrying candidate
+// since it is another indication of a non-carrying candidate
 back1:  nand 7, 7, 3
         movi 6, 0x7FFF
         beq 6, 7, flag2
 
-// now load back the bits, if they sum 2, it was a non carrying
+// sum the flag bits, if they sum 2, it was a non carrying
 // candidate -> end prematurely.
-back2:  lw 1, 0, 0
-        lw 2, 0, 1
-        add 1, 1, 2
+back2:  add 1, 1, 2
         movi 2, 2
         beq 1, 2, end
 
@@ -43,10 +41,9 @@ done:   beq 0, 0, end
 
 // subroutines accessed with jumps:
 flag1:  movi 1, 1
-        sw 1, 0, 0
         beq 0, 0, back1
 
-flag2:  sw 1, 0, 1
+flag2:  movi 2, 1
         beq 0, 0, back2
 
 end:    halt
