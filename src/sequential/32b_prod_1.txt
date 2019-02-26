@@ -99,7 +99,7 @@ nop
 // | IT IS FOR AVOIDING MULTIPLYING LAST 0's										 |
 // ----------------------------------------------------------------------------------
 
-cont: 		beq 0, 0, main_loop
+cont: 		beq 0, 0, main_loop				// return to the main execution
 select_smaller:	movi 6, 0x0 				// counter
 				
 loop_opt: 	nand 7, 7, 7				// negate and
@@ -108,8 +108,8 @@ loop_opt: 	nand 7, 7, 7				// negate and
 			nand 1, 1, 1				// negate them
 			nand 2, 2, 2
 			addi 6, 6, 0x1				// counter++
-			beq 1, 0, switch_a_b
-			beq 2, 0, start
+			beq 1, 0, switch_a_b		// switch a with b
+			beq 2, 0, start				// else keep looping
 			nand 7, 7, 7
 			add 7, 7, 7					// shift mask
 			beq 0, 0, loop_opt
@@ -119,11 +119,11 @@ switch_a_b: lw 2, 0, 0x0				// switch a and b
 			sw 1, 0, 0x0
 			sw 2, 0, 0x1
 
-start: 		lw 1, 0, 0x0				// 
+start: 		lw 1, 0, 0x0				// initialize the register in order to continue execution.
 			lw 2, 0, 0x1
 			lw 7, 0, 0x4
 			sw 6, 0, 0x7
-			sw 0, 0, 0x2 	// shifted_a_msb
-			sw 1, 0, 0x3 	// shifted_b_msb
-			beq 0, 0, cont
+			sw 0, 0, 0x2 				// save shifted_a_msb into memory
+			sw 1, 0, 0x3 				// save shifted_a_lsb into memory
+			beq 0, 0, cont				// return to the main execution
 end_halt: 	halt
