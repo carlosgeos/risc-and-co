@@ -1,49 +1,24 @@
 // inputs
-        movi 1, 0x0000
-        movi 2, 0x8001
+        movi 1, 0x0000 // number a
+        movi 2, 0x8001 // number b
 
-// prepare regs for carry verification
+// prepare mask for carry verification
         movi 7, 0x8000
-        movi 6, 0x7FFE
 
-// calculates the sum and save it in reg3
+// calculate the sum and save it in reg3
         add 3, 1, 2
 
-// NAND of registers 1, 2 with 0x8000 mask
-        nand 1, 7, 1
-        nand 2, 7, 2
+// ----------------------- CARRY CHECK ----------------------
+        nand 1, 7, 1        // nand a with mask to get MSB
+        nand 2, 7, 2        // nand b with mask to get MSB
+        nand 5, 3, 7        // nand result with mask to get MSB
+        nand 7, 7, 7        // nand mask with mask to get a 0x7FFF mask
+        beq 1, 2, verify    // both MSB of a and b are equal (1 or 0)
+        beq 5, 7, end       // only one of the MSB is 1 and the MSB of result is 1 => no carry
+        beq 0, 0, carry     // other (only) possible case, MSB of result is 0 => carry
 
-// check if both MSB are 0 => definitely no carry, end
-        nand 5, 1, 2
-        beq 0, 5, end
-
-// otherwise, delete bad candidate for carry
-// first check: add the two masks to see if MSBs are 1, 1 or 1, 0
-        add 5, 1, 2
-        beq 5, 6, flag1
-
-// second check: is the sum MSB a 1 or a 0 ? If 1, store another bit
-// since it is another indication of a non-carrying candidate
-back1:  nand 7, 7, 3
-        movi 6, 0x7FFF
-        beq 6, 7, flag2
-
-// sum the flag bits, if they sum 2, it was a non carrying
-// candidate -> end prematurely.
-back2:  add 1, 1, 2
-        movi 2, 2
-        beq 1, 2, end
-
-// add carry by default if not terminated earlier
-default:movi 4, 1
-
-done:   beq 0, 0, end
-
-// subroutines accessed with jumps:
-flag1:  movi 1, 1
-        beq 0, 0, back1
-
-flag2:  movi 2, 1
-        beq 0, 0, back2
+verify: beq 1, 7, carry     // both MSB are 1 => carry
+        beq 0, 0, end
+carry:  addi 4, 4, 0x1      // add carry bit to the result
 
 end:    halt

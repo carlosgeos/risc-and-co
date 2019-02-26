@@ -5,9 +5,9 @@
 //    + R6 R5    ---->  We are going to call this number b.
 //     _______
 //      R4 R3    ---->  Called result
-// 
+//
 // The idea is to sum up both registers and then check if there is a carry when summing up R3 + R4
-// If it is the case then increment the result of MSB in 1.
+// If it is the case then increment the result of msbyte in 1.
 
 // inputs ignored by server
             movi 4, 0xffff
@@ -17,22 +17,23 @@
 
             movi 7, 0x8000      // mask
 
-// apply mask in order to know if MSB of a, b, result (LSB) is 1 or 0
-            nand 1, 3, 7        // nand a (LSB) with mask
-            nand 2, 5, 7        // nand b (LSB) with mask
+// apply mask in order to know if MSB of lsbytes of a, b is 1 or 0.
+            nand 1, 3, 7        // nand a (lsbyte) with mask
+            nand 2, 5, 7        // nand b (lsbyte) with mask
 
 // calculate result without carry
             add 4, 6, 4
             add 3, 5, 3
 
 // ----------------------- CARRY CHECK -----------------------------------
-            nand 5, 3, 7        // nand result (LSB) with mask
-            nand 7, 7, 7        // nand mask with mask
-            beq 1, 2, verify
-            beq 5, 7, end // It meas that LSB a or LSB b most significant bit is 1 and the LSB result most significant bit is 0.
-            beq 0, 0, add_carry
-verify:     beq 1, 7, add_carry // both LSB a and LSB b most significant bit is 1
+            nand 5, 3, 7        // nand result (lsbyte) with mask
+            nand 7, 7, 7        // nand mask with mask to get a 0x7FFF mask
+            beq 1, 2, verify    // both MSB of lsbytes a and b are equal (1 or 0)
+            beq 5, 7, end       // only one of the MSB of lsbyte of a and b is 1 and the MSB of lsbyte of result is 1 => no carry
+            beq 0, 0, add_carry // other (only) possible case, MSB of lsbyte of result is 0 => carry
+
+verify:     beq 1, 7, add_carry // both MSB of lsbytes a and b are 1 => carry
             beq 0, 0, end
-add_carry:  addi 4, 4, 0x1 // add carry bit to the result (MSB)
+add_carry:  addi 4, 4, 0x1      // add carry bit to the result (msbyte)
 
 end:        halt
