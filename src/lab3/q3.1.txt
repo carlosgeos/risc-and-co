@@ -1,0 +1,24 @@
+movi 1, 0x0003 // First operand
+movi 2, 0x0004 // Second operand
+movi 3, 0x0000 // Result register (LSB)
+movi 4, 0x0000 // Result register (MSB)
+
+movi 5, 0x0001 // Mask the least significant bit
+
+movi 6, 0x0000 // TMP register
+movi 7, 0x0000 // Accumulator
+
+beq 0, 0, loop
+
+pre_loop: addi 7, 7, 1 // Loop counter increment
+loop: beq 1, 0, end
+      nand 6, 5, 1 // Verify the LSB of the first operand
+      nand 6, 6, 6
+      shifti 1, 1, -1 // Shift to the right
+      beq 6, 5, acc
+      beq 0, 0, pre_loop
+acc:  sha 6, 2, 7 // Shift the second operand we add in the result with matching bit of the first operand we are multiplying
+      add 3, 3, 6 // Add to the accumulator so we can shit the result
+      beq 0, 0, pre_loop
+
+end: halt⏎                                                                                                                                                                                                                                   
