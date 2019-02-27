@@ -11,6 +11,72 @@
 // 3.- If the signs of both numbers are equal then we negate the second number and do an addition, then we check the sign of the result,
 //     if it is positive, then we add 1 to register 3 and 0 otherwise.
 
+// TEST VECTORS
+
+// a)
+// 0xFFFE register 1 (negative number)
+// 0x0002 register 2 (positive number)
+// 0x0000 register 3 (false)
+
+// These test vectors have been chosen because a comparison can be made between two signed numbers, the first one negative and the other positive.
+
+// b)
+// 0x0002 register 1 (positive number)
+// 0xFFFE register 2 (negative number)
+// 0x0001 register 3 (result true)
+
+// These test vectors have been chosen because a comparison can be made between two signed numbers, the first one positive and the other negative.
+
+// c)
+// 0x0002 register 1
+// 0x0002 register 2
+// 0x0001 register 3 (result true)
+
+// These test vectors have been chosen because a comparison can be made between two positive numbers which are equal.
+
+// d)
+// 0xFFFE register 1
+// 0xFFFE register 2
+// 0x0001 register 3 (result true)
+
+// These test vectors have been chosen because a comparison can be made between two negative numbers which are equal.
+
+// e)
+// 0x0000 register 1
+// 0x0000 register 2
+// 0x0001 register 3 (result true)
+
+// These test vectors have been chosen because a comparison can be made between two positive signed numbers which are both 0.
+
+// f)
+// 0x0006 register 1
+// 0x0003 register 2
+// 0x0001 register 3 (result true)
+
+// These test vectors have been chosen because a comparison can be made between two different positive numbers. First number stored in register 1 is bigger than the second number stored in register 2.
+
+// g)
+// 0x0003 register 1
+// 0x0006 register 2
+// 0x0000 register 3 (result false)
+
+// These test vectors have been chosen because a comparison can be made between two different positive numbers. Second number stored in register 2 is bigger than the first number stored in register 1.
+
+// h)
+// 0xFFFB register 1
+// 0xFFFA register 2
+// 0x0001 register 3 (result true)
+
+// These test vectors have been chosen because a comparison can be made between two different negative numbers. First number stored in register 1 is bigger than the second number stored in register 2.
+
+// i)
+// 0xFFFA register 1
+// 0xFFFB register 2
+// 0x0000 register 3 (result false)
+
+// These test vectors have been chosen because a comparison can be made between two different negative numbers. Second number stored in register 2 is bigger than the first number stored in register 1.
+
+
 			movi 1,0x0004 // store number a
 			movi 2,0x0004 // store number b
 
