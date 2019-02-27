@@ -1,8 +1,8 @@
 // We are going to compare if one number is greater or equal than another number using RiSC16'S 8-instruction architecture
 //
-// 			R1 	------> called a
-//		    R2  ------> called b
-//          R3  ------> Result (1 or 0)
+//      R1  ------> called a
+//      R2  ------> called b
+//      R3  ------> Result (1 or 0)
 //
 // The main idea is to check the signs of both numbers and proceed accordingly. We have several scenarios to take into consideration:
 // 1.- If both numbers are equal, then we add 1 to register 3
@@ -12,24 +12,24 @@
 //     if it is positive, then we add 1 to register 3 and 0 otherwise.
 
 
-			movi 1,0x0004 // store number a
-			movi 2,0x0004 // store number b
+                        movi 1,0x0004 // store number a
+                        movi 2,0x0004 // store number b
 
-			addi 3,0,0
-         	movi 7, 0x8000  // mask used to get the MSB of a number.
-			addi 6,0,-1 	// (0xFFFF) number used to compare the result of the nand operation between the mask and a number.
-			beq 1,2,true 	// if both numbers are equal, then go to true.
-			nand 4,1,7		// mask reg1 in reg4.
-			nand 5,2,7		// mask reg2 in reg5.
-			beq 4,5,equal_sign // compare both registers to check if both numbers have the same sign.
-			beq 5,6,false // get sign of second number, if it is 0 that means it is positive, therefore second number is bigger.
-			beq 0,0,true  // jump to true because a is bigger than b.
-equal_sign: nand 4,2,2    // switch all the bits from b.
-			addi 4,4,1   // add 1 to result in order to negate number b (complement of 2).
-			add  4,1,4  // apply subtraction.
-			nand 4,4,7  // get MSB of result.
-			beq  4,6, true // compare the sign of the result to check which number is bigger.
-false: 		addi 3,0,0
-			beq 0,0,end
-true:		addi 3,0,1
-end:		halt
+                        addi 3, 0, 0
+                        movi 7, 0x8000           // mask used to get the MSB of a number.
+                        addi 6, 0, -1            // (0xFFFF) number used to compare the result of the nand operation between the mask and a number.
+                        beq 1, 2, true           // if both numbers are equal, then go to true.
+                        nand 4, 1, 7             // mask reg1 in reg4.
+                        nand 5, 2, 7             // mask reg2 in reg5.
+                        beq 4, 5, equal_sign     // compare both registers to check if both numbers have the same sign.
+                        beq 5, 6, false          // get sign of second number, if it is 0 that means it is positive, therefore second number is bigger.
+                        beq 0, 0, true           // jump to true because a is bigger than b.
+equal_sign:             nand 4, 2, 2             // switch all the bits from b.
+                        addi 4, 4, 1             // add 1 to result in order to negate number b (complement of 2).
+                        add  4, 1, 4             // apply subtraction.
+                        nand 4, 4, 7             // get MSB of result.
+                        beq  4, 6, true          // compare the sign of the result to check which number is bigger.
+false:                  addi 3, 0, 0
+                        beq 0, 0, end
+true:                   addi 3, 0, 1
+end:                    halt
