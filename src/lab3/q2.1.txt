@@ -1,20 +1,23 @@
-	movi 1,0x0004
-	movi 2,0x0004
-	addi 3,0,0
-         movi 7, 0x8000
-	addi 6,0,-1 	//mask for comparison
-	beq 1,2,true // if both numbers are the same then go to true
-	nand 4,1,7		// mask reg1 in reg4
-	nand 5,2,7		// mask reg2 in reg5
-	beq 4,5,equal_sign // compare both registers to check if both numbers have the same sign
-	beq 5,6,false // get sign of second number, if it is 0 that means it is positive, therefore second number is bigger
-	beq 0,0,true
+	
+	
+			movi 1,0x0004
+			movi 2,0x0004
+
+			addi 3,0,0
+         	movi 7, 0x8000
+			addi 6,0,-1 	//mask for comparison
+			beq 1,2,true 	// if both numbers are the same then go to true
+			nand 4,1,7		// mask reg1 in reg4
+			nand 5,2,7		// mask reg2 in reg5
+			beq 4,5,equal_sign // compare both registers to check if both numbers have the same sign
+			beq 5,6,false // get sign of second number, if it is 0 that means it is positive, therefore second number is bigger
+			beq 0,0,true
 equal_sign: nand 4,2,2
-         addi 4,4,1
-         add  4,1,4
-         nand 4,4,7
-         beq  4,6, true
-false: 	addi 3,0,0
-	beq 0,0,end
-true:	addi 3,0,1
-end:	halt
+			addi 4,4,1
+			add  4,1,4
+			nand 4,4,7
+			beq  4,6, true
+false: 		addi 3,0,0
+			beq 0,0,end
+true:		addi 3,0,1
+end:		halt
