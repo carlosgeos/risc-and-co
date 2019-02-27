@@ -1,0 +1,8 @@
+We noticed that the number of instructions reduced significantly. Regarding question 2, the implementation
+of the "greater or equal" operand was more complicated to implement using only 8 instructions since more operations
+were needed. For example, a negation of the second number was required in order to make the corresponding comparison
+whereas in the extended instruction set only one instruction was needed. Regarding question 3, using the Special IS[1] architecture
+the performance improved since the number of instructions reduced from 800 (RiSC16 Original) to 200 instructions for 16 bits argument size.
+Finally, using the Special IS[2] architecture, the complexity was constant.
+In conclusion, Special IS[2] is much more preformat, powerful and uses less instructions to implement the same
+logic for the given exercises.
