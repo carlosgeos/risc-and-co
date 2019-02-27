@@ -1,0 +1,14 @@
+// We compare R1 with R2 if (R1 >= R2) then R3 <- 1 else R3 <- 0
+
+//inputs
+movi 1, 0xfffa
+movi 2, 0xffff
+
+// both numbers are equal
+beq 1, 2, yes		// R1 == R2 ?
+bg 1, 2, yes		// R1 > R2 ?
+addi 3, 0, 0x0		// R1 < R2
+beq 0, 0, end	
+yes: addi 3, 0, 0x1 	// R3 <- 1
+
+end: halt
