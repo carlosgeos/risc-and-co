@@ -9,9 +9,9 @@ IS[1] architecture the performance improved since the number of
 instructions reduced from 800 (RiSC16 Original) to 200 instructions
 for 16 bits argument size.
 
-Finally, when multiplicating two 16-bit numbers using the Special
+Finally, when multiplying two 16-bit numbers using the Special
 IS[2] architecture, the complexity remained constant for different
-argument sizes
+argument sizes.
 
 In conclusion, Special IS[2] is much more performant, powerful and
 uses less instructions to implement the same logic for the given
