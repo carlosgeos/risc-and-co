@@ -1,6 +1,6 @@
 We noticed that the number of instructions reduced
 significantly. Regarding question 2, the implementation of the
-"greater or equal" operand was more complicated to implement using
+"greater or equal" operator was more complicated to implement using
 only 8 instructions since more operations were needed. For example, a
 negation of the second number was required in order to make the
 corresponding comparison whereas in the extended instruction set only
