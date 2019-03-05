@@ -1,4 +1,4 @@
-Chosen operand: Greater or equal than (>=)
+Chosen operator: Greater or equal than (>=)
 
 a)
 0xFFFE register 1 (negative number)
