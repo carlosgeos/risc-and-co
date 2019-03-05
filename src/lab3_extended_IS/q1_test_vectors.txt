@@ -1,3 +1,5 @@
+Chosen operand: Greater or equal than (>=)
+
 a)
 0xFFFE register 1 (negative number)
 0x0002 register 2 (positive number)
