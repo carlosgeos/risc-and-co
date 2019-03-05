@@ -7,7 +7,7 @@ add 5, 2, 0
 add 6, 1, 0
 
 // multiply mul R5 and R6
-// It will ave the answer in R4 (MSB) R5(LSB)
+// It will have the answer in R4 (MSB) R5(LSB)
 mul 5, 5, 6
 
 //move R5 to R3
