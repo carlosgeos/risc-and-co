@@ -1,0 +1,36 @@
+Question 1 : Detail the architecture of the CPU used in this micro controller. Focus on the CPU, not on the peripherals
+Too much documentation
+
+Question 2: Explain the difference between a microprocessor and a micro controller
+In a micro controller everything is embedded on a single chip (MEMORY), It is meant for specific applications
+In a microprocessor you only have the CPU and you can add whatever you want
+
+Question 3: Look at lines related to the I/O port PORTA, for example. Explain the utility of this header file
+The main benefit of having this file is that you have the definition of the I/0 ports and pins. The compiler will link
+those variables to the actual memory.
+
+Question 4: Explain the use of the adjective “volatile” in this header file.
+It is to tell the compiler that a variable may change at any specific point, so it shouldn't optimize it. This is useful when doing optimization or
+when the interruptions are enabled.
+
+Question 5:  Are the integer types signed or unsigned if you do not specify it explicitly?
+They are signed by default
+
+Question 6. Add Data types.h in the header files of your project, explain the improvement given by these new definitions.
+The benefit is that you remove ambiguity between micro processors and code execution. If we wanted to change the code for
+a specific micro processor we just change the code in that file.
+
+
+Question 7. Observe the number of instructions necessary to initialize each variable, use the “Stopwatch” window.
+Two instruction
+To initialize an INT8U variable it took 2 instruction cycles
+To initialize an INT8S variable it took 2 instruction cycles
+To initialize an INT16U variable it took 2 instruction cycles
+To initialize an INT16S variable it took 2 instruction cycles
+To initialize an INT32U variable it took 4 instruction cycles
+To initialize an INT32S variable it took 4 instruction cycles
+To initialize an INT64U variable it took 8 instruction cycles
+To initialize an INT64S variable it took 8 instruction cycles
+To initialize an FP32 variable it took 4 instruction cycles
+To initialize an FP64 variable it took 8 instruction cycles
+To initialize an GLOBAL1 variable it took 1 instruction cycle
