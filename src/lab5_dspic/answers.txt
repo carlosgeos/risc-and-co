@@ -5,6 +5,8 @@ Question 2: Explain the difference between a microprocessor and a micro controll
 In a micro controller everything is embedded on a single chip (MEMORY), It is meant for specific applications
 In a microprocessor you only have the CPU and you can add whatever you want
 
+Header Files
+
 Question 3: Look at lines related to the I/O port PORTA, for example. Explain the utility of this header file
 The main benefit of having this file is that you have the definition of the I/0 ports and pins. The compiler will link
 those variables to the actual memory.
@@ -12,6 +14,8 @@ those variables to the actual memory.
 Question 4: Explain the use of the adjective “volatile” in this header file.
 It is to tell the compiler that a variable may change at any specific point, so it shouldn't optimize it. This is useful when doing optimization or
 when the interruptions are enabled.
+
+Types of Variables
 
 Question 5:  Are the integer types signed or unsigned if you do not specify it explicitly?
 They are signed by default
@@ -34,3 +38,39 @@ To initialize an INT64S variable it took 8 instruction cycles
 To initialize an FP32 variable it took 4 instruction cycles
 To initialize an FP64 variable it took 8 instruction cycles
 To initialize an GLOBAL1 variable it took 1 instruction cycle
+
+
+Question 8. The code defines a global variable glob1. Where is it defined and initialized?
+It is initialized and defined in the same point, the program specifies that it is going to be linked in the w8 register.
+
+Question 9. Explain how to place this variable in a register (the grammar can vary depending on the compiler, but the keyword register is always used).
+register INT8U *glob1 asm ("w8")
+
+Variable assignations
+
+Question 10. Observe and comment the way variables are accessed compared to variables.c.
+The main difference is that we don't use a pointer to the stack, but directly to the memory
+
+Question 11. Observe the way assignations work. Explain any unexpected result.
+In line 16 of initvar.c there is an assignation of a 16 bit int number into a 8 bit int variable, this may lead
+to an unexpected result depending on the size of the 16 bit int number. This also happens in line 24
+
+Arithmetics
+
+Basics
+
+Question 12. How are the different additions and multiplications carried out?
+There are differences between data types, for example when performing an addition of two INT8 numbers and storing the
+result in a INT8 variable and performing an addition between two INT8 numbers and storing the result in a INT16 Variable
+
+Question 13. For each operation, indicate if the result is correct; if it is not, explain the error and the result obtained. Explain the tests (if) based on the ”Carry” C and on the ”Overflow” OV.
+Negative unsigned number found g = e - f
+
+over flow found in g = e + f in line 26 (We are not managing overflow)
+
+Question 14. Compare time necessary to execute the multiplications. Are all results correct?
+All results seem correct, would need to verify again
+
+
+
+
