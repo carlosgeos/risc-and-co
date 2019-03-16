@@ -60,16 +60,172 @@ Arithmetics
 Basics
 
 Question 12. How are the different additions and multiplications carried out?
-There are differences between data types, for example when performing an addition of two INT8 numbers and storing the
-result in a INT8 variable and performing an addition between two INT8 numbers and storing the result in a INT16 Variable
+The carry is handled by the SRbit.C register. When a carry occurs this variable will be turned on (True or bit flag in 1) otherwise it will be turned off (False or bit flag in 0). Additionally, the carry can be handled by the SR register with control codes 0x0C that means that there was an overflow when summing up two numbers and the result was positive, control code 0x05 indicates that the result of the operation was negative with overflow. 
 
 Question 13. For each operation, indicate if the result is correct; if it is not, explain the error and the result obtained. Explain the tests (if) based on the ”Carry” C and on the ”Overflow” OV.
-Negative unsigned number found g = e - f
+a) The result is incorrect, there is overflow and carry. The SRbits.C register flags and the result of the operation becomes the max. Possible representation number for a 16bits.
+	e = 63457;
+	f = 5478;
+	g = e+f; //INT16U = INT16U + INT16U
+	if(SRbits.C) g=0xFFFF;
+b) There is an overflow when summing s1 and s2. Same as a)
+// signed addition	
+	s1 = 96;
+	s2 = 40;
+	s3 = s1 + s2; //INT8S = INT8S + INT8S
+	a = SR; // save LSByte of Status
+	if(a==0x0C)s3 = 127; //Overflow (bit2) and Negative (bit3) // enters here!
+	if(a==0x05)s3 = -128;//Overflow (bit2) and Carry (bit1)
+c) There is an overflow when summing s1 and s2. See as a)
 
-over flow found in g = e + f in line 26 (We are not managing overflow)
+	s1 = -96;
+	s2 = -40;
+	s3 = s1 + s2; //INT8S = INT8S + INT8S
+	a = SR; // save LSByte of Status
+	if(a==0x0C)s3 = 127; //Overflow (bit2) and Negative (bit3)
+	if(a==0x05)s3 = -128;//Overflow (bit2) and Carry (bit1) // enters here!!!
+
+d) In case of the multiplication the result is not correct neither. There is an overflow in the multiplication. Even though the result is allocated into an int32 variable, overflow is not considered. That's why we need to cast first!
+
+	h = e*f; //INT32U = INT16U * INT16U
+
+f) Same as d.
+	j = h*i;  //INT64U = INT32U * INT32U
 
 Question 14. Compare time necessary to execute the multiplications. Are all results correct?
-All results seem correct, would need to verify again
+Time of all operations below:
+
+μs	Instruction
+-------------------------------------------------------------------------
+
+0.1	c = a+b; //INT8U = INT8U + INT8U
+0.1	g = a+b; //INT16U = INT8U + INT8U
+	
+0.07	g = e+f; //INT16U = INT16U + INT16U
+0.07	g = e-f; //INT16U = INT16U - INT16U
+
+
+0.1	c = a*b; 					//INT8U = INT8U * INT8U
+0.1	g = a*b; 					//INT16U = INT8U * INT8U
+0.07	g = e*f; 					//INT16U = INT16U * INT16U
+0.1	h = e*f; 					//INT32U = INT16U * INT16U
+0.25	h = (INT32U)e*(INT32U)f; 	//typecast before multiplying
+0.37	j = h*i; 					//INT64U = INT32U * INT32U
+1.83	j = (INT64U)h*(INT64U)i;	//typecast before multiplying
+
+We can see that performing operations between variables of 16b is faster than the rest.
+Moreover, the cast operation is very expensive.
+
+Question 15. Observe the various manners of computing a×b/c: What are the differences? Explain why the multiplication should be done first.
+
+
+The different ways to compute axb/c are:
+	axb/c
+	(axb)/c
+	(a/c)/b
+
+The first one and the second one will be translated to the same assembly code. The result of this operation should be 442.2. As the variables are defined to be integers they don't handle with float point numbers so the correct result should be 442 in decimal. The two first operations calculate the result correctly; however, the third one gives 440. This is because the division operation was performed first and the float point part was significant and omitted. That's why performing first multiplications are important.
+
+Question 16. Compare the computing time of the operations. Which one is the longest operation?
+
+μs	Instruction
+---------------------------------------------------
+0.47	d=(a*b)/c;
+0.49	d=(a/c)*b;
+	
+0.46 	f=a*b/c; 
+0.47	f=(a*b)/c;
+0.5	f=(a/c)*b;
+0.5	f=a*(b/c);
+
+0.47	f=(a*b)/c;
+0.48	d=(a/c)*b;
+
+These two: f=(a/c)*b; f=a*(b/c); were the longest ones. It needs to calculate the division result before multiplying.
+
+Question17. Compare, for the 3 methods, the result and the number of clock cycles. 
+
+First method
+Result: 0x39
+Total N. Cycles: 245
+	f3 = f1*f2;			-> 124
+	c = (INT8U)f3;			-> 121
+
+Second method
+Result: 0x38
+Total N. Cycles: 9
+	d = (INT16U)a*(INT16U)b;	-> 6
+	c = d >> 8;			-> 3
+
+Third method
+Result: 0x39
+Total N. Cycles: 10
+	d = (INT16U)a*(INT16U)b;	-> 6
+	c = (d + 128) >> 8;		-> 4
+
+Question 19. Explain how rounding works in the 3rd method.
+
+We just add 0x80 to the multiplication result. If this bit (8th LSB in result) is 1 the final result will be affected and showed up due to the left shift.
+
+Result before shifting is 0x38F4 to this we sum up 0x80 (128 in decimal)
+In binary will be:
+	0011 1000 1111 0100
+       +0000 0000 1000 0000
+	-------------------
+	0011 1001 0111 0100
+
+Which is 0x3974. This will be shifted left so It will become 0x39 as it should be.
+
+Question 20. How would you change the program if f1 had to be multiplied by 24 and f2 by 26? Check that the saving of computation time of calculation is still significant in this case.
+
+INT8U a;
+INT16U c, b;
+void main(void)
+{
+	a = 135; // 8.431*16
+	b = 433; // 6.764*64
+	d = (INTU16)a*b
+	c = d >> 10
+}
+
+Compared to the third case this last version is better. N. Cycles: 8 (compared to the third case which is 10) and time is 0.13 μs (compared to the third case which is 0.17μs). Notice that we do not need to round.
+
+Question 21. Where are stored the variables of main() (a, b, c. . . )?
+0x1c is the WREG14 which corresponds to the frame pointer. Don't confuse with stack pointer which is WEG15 = 0x1e
+
+Variables are stored into the stack frame that corresponds with the main subroutine. Notice that it first allocate the bigger value (e with 32b).
+ a is stored at [0x1c+9] = 0x811
+ b is stored at [0x1c+8] = 0x810
+c is stored at [0x1c+6] = 0x80E
+d is stored at [0x1c+4] = 0x80C
+e is stored at [0x1c] = 0x808
+
+Question 22. Where are copied, in the main() function, the different parameters of Add3() and Mul2() before those function are called?
+
+Into regiters WREG0, WREG1, WREG2
+
+
+Question 23. In Add3() where are stored the local variable a?
+In the start of the stack frame that corresponds with the Add3 subroutine.
+
+Question 24. In Add3() where are stored the parameters passed to Add3()?
+In the next free spaces of the stack frame that corresponds with the Add3 subroutine.
+
+Question 25. How Add3() and Mul2() return their results?
+The function saves the result of the addition/multiplication in WREG0 and once it returns from the call, the main function moves the value from that register to the corresponding value of the pointer stack (d for sum, e for multiplication).
+
+Question 26. How is this parameter passed? (array)
+By reference, it passes the memory address explicitly not the value. #0x804
+
+Question 27. How is the array used in function1()?
+It is used as a pointer to the linear memory. 
+
+Question 28. Explain the mechanism used with swapnum().
+Call function passes memory address for a and b parameters. The swapnum function creates a temp variable, then it allocates the value of what it is allocated in the memory address into the temp variable, it swaps i, j values then it replaces the value of j for the value of temp so a and b swap values and keep it like that after function return.
+
+
+
+
 
 
 
