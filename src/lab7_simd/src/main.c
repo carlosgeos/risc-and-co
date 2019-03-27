@@ -12,18 +12,18 @@ int main(int argc, char* argv[]) {
 	char* output_filename = argv[2];
 	int treshold = atoi(argv[3]);
 
-	FILE* input = fopen(input_filename, "rb");
-	FILE* output = fopen(output_filename, "wb");
+	FILE* input = fopen(input_filename, "r");
+	FILE* output = fopen(output_filename, "w");
 
 	char buffer[255] = {0};
 
 	clock_t tstart, tend;
 	tstart = clock();
 
-	while (fgets(buffer, 255, input) != NULL) {
+	while (fgets(buffer, 256, input) != NULL) {
 		for (int i = 0; i < 255; ++i) {
-			unsigned char curr = (unsigned char) buffer[i];
-			if (curr < treshold) {
+			char curr = buffer[i];
+			if ((unsigned char) curr < treshold) {
 				curr = 0;
 			} else {
 				curr = 255;
