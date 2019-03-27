@@ -4,12 +4,13 @@
 #include <ctype.h>
 
 int main(int argc, char* argv[]) {
-	if (argc > 3 || argc < 3) {
-		printf("Usage: ./simd <filename> <output>\n");
+	if (argc > 4 || argc < 4) {
+		printf("Usage: ./simd <filename> <output> <treshold>\n");
 	}
 
 	char* input_filename = argv[1];
 	char* output_filename = argv[2];
+	int treshold = atoi(argv[3]);
 
 	FILE* input = fopen(input_filename, "r");
 	FILE* output = fopen(output_filename, "w");
@@ -31,14 +32,17 @@ int main(int argc, char* argv[]) {
 			}
 
 			if (i != start) {
-				printf("%s\n", number_buf);
 				content[byte_found] = atoi(number_buf);
 				++byte_found;
 			}
 		}
 
 		for (int i = 0; i < byte_found; ++i) {
-			fprintf(output, "%i ", content[i]);
+			if (content[i] < treshold) {
+				fprintf(output, "%i ", 0);
+			} else {
+				fprintf(output, "%i ", 255);
+			}
 		}
 	}
 
