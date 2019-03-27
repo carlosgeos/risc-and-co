@@ -14,8 +14,8 @@ int main(int argc, char* argv[]) {
 	FILE* input = fopen(input_filename, "r");
 	FILE* output = fopen(output_filename, "w");
 
-	char buffer[255];
-	int content[255];
+	char buffer[255] = {0};
+	int content[255] = {0};
 
 	clock_t tstart, tend;
 	tstart = clock();
@@ -24,13 +24,14 @@ int main(int argc, char* argv[]) {
 		int byte_found = 0;
 		for (int i = 0; i < 255; ++i) {
 			int start = i;
-			char number_buf[3];
+			char number_buf[4] = {0};
 			while (isdigit(buffer[i])) {
 				number_buf[i - start] = buffer[i];
 				++i;
 			}
 
 			if (i != start) {
+				printf("%s\n", number_buf);
 				content[byte_found] = atoi(number_buf);
 				++byte_found;
 			}
