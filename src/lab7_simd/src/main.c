@@ -12,37 +12,23 @@ int main(int argc, char* argv[]) {
 	char* output_filename = argv[2];
 	int treshold = atoi(argv[3]);
 
-	FILE* input = fopen(input_filename, "r");
-	FILE* output = fopen(output_filename, "w");
+	FILE* input = fopen(input_filename, "rb");
+	FILE* output = fopen(output_filename, "wb");
 
 	char buffer[255] = {0};
-	int content[255] = {0};
 
 	clock_t tstart, tend;
 	tstart = clock();
 
 	while (fgets(buffer, 255, input) != NULL) {
-		int byte_found = 0;
 		for (int i = 0; i < 255; ++i) {
-			int start = i;
-			char number_buf[4] = {0};
-			while (isdigit(buffer[i])) {
-				number_buf[i - start] = buffer[i];
-				++i;
-			}
-
-			if (i != start) {
-				content[byte_found] = atoi(number_buf);
-				++byte_found;
-			}
-		}
-
-		for (int i = 0; i < byte_found; ++i) {
-			if (content[i] < treshold) {
-				fprintf(output, "%i ", 0);
+			unsigned char curr = (unsigned char) buffer[i];
+			if (curr < treshold) {
+				curr = 0;
 			} else {
-				fprintf(output, "%i ", 255);
+				curr = 255;
 			}
+			fwrite(&curr, sizeof(curr), 1, output);
 		}
 	}
 
