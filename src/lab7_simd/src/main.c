@@ -18,8 +18,8 @@ void process_images(
         FILE* output = fopen(output_files[i], "w");
 
         // put input data into the buffer
-        int *buffer = malloc(sizes[i]*sizes[i]* sizeof(int));
-        fread(buffer, sizeof(int), sizes[i]*sizes[i], input);
+        unsigned char *buffer = malloc(sizes[i]*sizes[i]* sizeof(unsigned char));
+        fread(buffer, sizeof(unsigned char), sizes[i]*sizes[i], input);
 
         // process input data with threeshold
         for (unsigned int k = 0; k < sizes[i] * sizes[i]; k++) {
@@ -32,7 +32,7 @@ void process_images(
         }
 
         // write buffer data into output
-        fwrite(buffer, sizeof(int), sizes[i]*sizes[i], output);
+        fwrite(buffer, sizeof(unsigned char), sizes[i]*sizes[i], output);
 
         fclose(input);
         fclose(output);
@@ -45,17 +45,17 @@ void process_images(
 int main(int argc, char* argv[]) {
 
     unsigned char number_images = 3;
-    char **input_files = malloc(32 * sizeof( char *));
-    char **output_files = malloc(32 * sizeof( char *));
+    char **input_files = malloc(number_images * sizeof( char *));
+    char **output_files = malloc(number_images * sizeof( char *));
     unsigned int *sizes = malloc(number_images * sizeof(unsigned int));
 
     input_files[0] = "../images/input/Escher.raw";
     input_files[1] = "../images/input/kid.raw";
-    input_files[2] = "../images/input/lena_grey.raw";
+    input_files[2] = "../images/input/lena_gray.raw";
 
     output_files[0] = "../images/output/Escher.raw";
     output_files[1] = "../images/output/kid.raw";
-    output_files[2] = "../images/output/lena_grey.raw";
+    output_files[2] = "../images/output/lena_gray.raw";
 
     sizes[0] = 1024;
     sizes[1] = 1024;
