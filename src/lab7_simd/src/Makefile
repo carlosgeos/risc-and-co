@@ -1,4 +1,4 @@
-all: sisd
+all: simd
 SRC=./
 CC=gcc
 NO_EXTENDED_IS_FLAGS = -mno-mmx -mno-sse -mno-sse2 -mno-sse3 -mno-ssse3 \
@@ -13,7 +13,7 @@ OBJS=$(subst .c,.o,$(FILES))
 %.o: %.c
 		$(CC) -c $(CFLAGS) $(NO_EXTENDED_IS_FLAGS) -o $@ $<
 
-sisd:	$(OBJS)
+simd:	$(OBJS)
 		$(CC) -o $@ $(OBJS) $(LDFLAGS)
 
 clean:
