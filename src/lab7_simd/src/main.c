@@ -3,38 +3,67 @@
 #include <time.h>
 #include <ctype.h>
 
-int main(int argc, char* argv[]) {
-    if (argc > 4 || argc < 4) {
-        printf("Usage: ./sisd <filename> <output> <treshold>\n");
-        return 1;
-    }
-
-    char* input_filename = argv[1];
-    char* output_filename = argv[2];
-    int treshold = atoi(argv[3]);
-
-    FILE* input = fopen(input_filename, "r");
-    FILE* output = fopen(output_filename, "w");
-
-    char buffer[256] = {0};
-
+void process_images(
+        unsigned char threeshold,
+        char **input_files,
+        char **output_files,
+        unsigned char number_images,
+        unsigned int *sizes
+        ) {
     clock_t tstart, tend;
     tstart = clock();
+    // process each input image
+    for (unsigned char i = 0; i < number_images; i++) {
+        FILE* input = fopen(input_files[i], "rb");
+        FILE* output = fopen(output_files[i], "w");
 
-    while (fgets(buffer, 256, input) != NULL) {
-        for (int i = 0; i < 255; ++i) {
-            unsigned char curr = (unsigned char) buffer[i];
-            if ((unsigned char) curr < treshold) {
-                curr = 0;
-            } else {
-                curr = 255;
+        // put input data into the buffer
+        int *buffer = malloc(sizes[i]*sizes[i]* sizeof(int));
+        fread(buffer, sizeof(int), sizes[i]*sizes[i], input);
+
+        // process input data with threeshold
+        for (unsigned int k = 0; k < sizes[i] * sizes[i]; k++) {
+            if (buffer[k] < threeshold) {
+                buffer[k] = 0;
             }
-            fwrite(&curr, sizeof(curr), 1, output);
+            else {
+                buffer[k] = 255;
+            }
         }
-    }
 
+        // write buffer data into output
+        fwrite(buffer, sizeof(int), sizes[i]*sizes[i], output);
+
+        fclose(input);
+        fclose(output);
+    }
     tend = clock();
     float time = (float)(tend - tstart) / CLOCKS_PER_SEC;
-    printf("Time spent: %f\n", time);
+    printf("\nTime spent: %f\n", time);
+}
+
+int main(int argc, char* argv[]) {
+
+    unsigned char number_images = 3;
+    char **input_files = malloc(32 * sizeof( char *));
+    char **output_files = malloc(32 * sizeof( char *));
+    unsigned int *sizes = malloc(number_images * sizeof(unsigned int));
+
+    input_files[0] = "../images/input/Escher.raw";
+    input_files[1] = "../images/input/kid.raw";
+    input_files[2] = "../images/input/lena_grey.raw";
+
+    output_files[0] = "../images/output/Escher.raw";
+    output_files[1] = "../images/output/kid.raw";
+    output_files[2] = "../images/output/lena_grey.raw";
+
+    sizes[0] = 1024;
+    sizes[1] = 1024;
+    sizes[2] = 512;
+
+    process_images(127, input_files, output_files, number_images, sizes);
+
+    (void)argc;
+    (void)argv;
     return EXIT_SUCCESS;
 }
