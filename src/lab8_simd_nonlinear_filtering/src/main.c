@@ -53,7 +53,7 @@ void process_image_simd(
             unsigned char *ptrin = malloc(sizes[i]*sizes[i]* sizeof(unsigned char));
             unsigned char *ptrout = malloc(sizes[i]*sizes[i]* sizeof(unsigned char));
 //            unsigned long ii = 1;
-            unsigned long ii = sizes[i]*sizes[i]/14 - 2*sizes[i];
+            unsigned long ii = sizes[i]*sizes[i]/14;
 
             // validate that there is enough memory
             if (ptrin == NULL || ptrout == NULL) {
@@ -74,11 +74,11 @@ void process_image_simd(
                 "l1: \n"
                     "movdqu     (%%rsi), %%xmm0\n"
                     "movdqu     %%xmm0, %%xmm3\n"
-                    //"add        $1024, %%rsi\n"
+                    "add        $1024, %%rsi\n"
                     "movdqu     1024(%%rsi), %%xmm1\n"
-                    //"add        $1024, %%rsi\n"
+                    "add        $1024, %%rsi\n"
                     "movdqu     2048(%%rsi), %%xmm2\n"
-                    //"sub        $2048, %%rsi\n"
+                    "sub        $2048, %%rsi\n"
                     "pmaxub     %%xmm1, %%xmm0\n" // Calculate max
                     "pmaxub     %%xmm2, %%xmm0\n"
                     "pminub     %%xmm1, %%xmm3\n" // Calculate Min
@@ -89,14 +89,14 @@ void process_image_simd(
                     "movdqu     %%xmm3, %%xmm5\n"
                     "pslldq     $1, %%xmm6\n" // Shift max
                     "pslldq     $2, %%xmm7\n"
-                    "pslldq     $1, %%xmm4\n" // Shift min
-                    "pslldq     $2, %%xmm5\n"
+                    "psrldq     $1, %%xmm4\n" // Shift min
+                    "psrldq     $2, %%xmm5\n"
                     "pmaxub     %%xmm7, %%xmm6\n" // Get max between the 3 rows
                     "pmaxub     %%xmm0, %%xmm6\n"
                     "pminub     %%xmm5, %%xmm4\n" // Get the min between the 3 rows
                     "pminub     %%xmm3, %%xmm4\n"
-                   // "psubusb      %%xmm4, %%xmm6\n" // Make subtraction
-                    "movdqu     %%xmm4, (%%rdi)\n"
+                    "psubusb      %%xmm4, %%xmm6\n" // Make subtraction
+                    "movdqu     %%xmm6, (%%rdi)\n"
                     "add        $14, %%rdi\n"
                     "add        $14, %%rsi\n"
                     "sub        $1,  %%rcx\n"
