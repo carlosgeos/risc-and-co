@@ -1,11 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <math.h>
+#include "utils.h"
+
 
 // FUNCTION DECLARATION:
 
 /**
- * @param threshold
  * @param input_files 
  * @param output_files 
  * @param number_images 
@@ -19,18 +21,17 @@ void process_image_simd(
         );
 
 /**
- * @param threshold 
  * @param input_files 
  * @param output_files 
  * @param number_images 
  * @param sizes 
  */
 void process_images_c(
-        unsigned char threshold,
         char **input_files,
         char **output_files,
         unsigned char number_images,
-        unsigned int *sizes
+        unsigned int *sizes,
+        unsigned int window_size
         );
 
 
@@ -49,10 +50,9 @@ void process_image_simd(
 
         if (input != NULL && output != NULL) {
 
-            // initialize source/destination/counter/threshold variables
+            // initialize source/destination/counter variables
             unsigned char *ptrin = malloc(sizes[i]*sizes[i]* sizeof(unsigned char));
             unsigned char *ptrout = malloc(sizes[i]*sizes[i]* sizeof(unsigned char));
-//            unsigned long ii = 1;
             unsigned long ii = (sizes[i]*sizes[i]-(2*sizes[i]))/14 ;
 
             // validate that there is enough memory
@@ -63,9 +63,6 @@ void process_image_simd(
             // load source
             fread(ptrin, sizeof(unsigned char), sizes[i]*sizes[i], input);
 
-
-
-            // process input data with threshold
             __asm__ (
                 "start: \n"
                     "mov        %1, %%rsi\n"
@@ -119,34 +116,38 @@ void process_image_simd(
 }
 
 void process_images_c(
-        unsigned char threshold,
         char **input_files,
         char **output_files,
         unsigned char number_images,
-        unsigned int *sizes
+        unsigned int *sizes,
+        unsigned int window_size
         ) {
-
     // process each input image
     for (unsigned char i = 0; i < number_images; i++) {
         FILE* input = fopen(input_files[i], "rb");
         FILE* output = fopen(output_files[i], "w");
+        unsigned int counter_buffer_out = 0;
+        unsigned int buffer_out_size = (sizes[i]-2)*(sizes[i]-2);
 
         // put input data into the buffer
         unsigned char *buffer = malloc(sizes[i]*sizes[i]* sizeof(unsigned char));
+        unsigned char *buffer_out = malloc(buffer_out_size* sizeof(unsigned char));
         fread(buffer, sizeof(unsigned char), sizes[i]*sizes[i], input);
-
+        unsigned char *window_elements = malloc(sizeof(unsigned char)*window_size*window_size);
         // process input data with threshold
-        for (unsigned int k = 0; k < sizes[i] * sizes[i]; k++) {
-            if (buffer[k] < threshold) {
-                buffer[k] = 0;
-            }
-            else {
-                buffer[k] = 255;
-            }
+        for (unsigned int k = 0; k < (sizes[i]*sizes[i]); k++) {
+              for (unsigned int m = 0; m < window_size*window_size;m++){
+               window_elements[m] = buffer[(int)(floor(m/window_size)*sizes[i]) + m%window_size + k];
+              }
+              quicksort(window_elements,0,(window_size*window_size)-1);
+
+              buffer_out[counter_buffer_out] = window_elements[(window_size*window_size)-1] - window_elements[0];
+              counter_buffer_out++;
+
         }
 
         // write buffer data into output
-        fwrite(buffer, sizeof(unsigned char), sizes[i]*sizes[i], output);
+        fwrite(buffer_out, sizeof(unsigned char), buffer_out_size, output);
 
         // free memory and close files
         free(buffer);
@@ -163,7 +164,7 @@ void process_images_c(
  */
 int main(int argc, char* argv[]) {
     float time_c, time_simd;
-    unsigned char number_images = 2;
+    unsigned char number_images = 3;
     char **input_files = malloc(number_images * sizeof( char *));
     char **output_files_c = malloc(number_images * sizeof( char *));
     unsigned int *sizes = malloc(number_images * sizeof(unsigned int));
@@ -179,29 +180,29 @@ int main(int argc, char* argv[]) {
     // Initialize input files
     input_files[0] = "Escher.raw";
     input_files[1] = "kid.raw";
-//    input_files[2] = "lena_gray.raw";
+    input_files[2] = "lena_gray.raw";
 
     // Initialize output files for C
     output_files_c[0] = "Escher_out_C.raw";
     output_files_c[1] = "kid_out_C.raw";
-//    output_files_c[2] = "lena_gray_out_C.raw";
+    output_files_c[2] = "lena_gray_out_C.raw";
 
     // Initialize size of files
     sizes[0] = 1024;
     sizes[1] = 1024;
-//    sizes[2] = 512;
+    sizes[2] = 512;
 
     // Process image with pure C and calculate time
-//    tstart = clock();
-//    process_images_c(threshold, input_files, output_files_c, number_images, sizes);
-//    tend = clock();
-//    time_c = (float)(tend - tstart) / CLOCKS_PER_SEC;
-//    printf("\nTime spent C: %f\n", time_c);
+    tstart = clock();
+    process_images_c(input_files, output_files_c, number_images, sizes,5);
+    tend = clock();
+    time_c = (float)(tend - tstart) / CLOCKS_PER_SEC;
+    printf("\nTime spent C: %f\n", time_c);
 
     // Initialize output files for SIMD
     output_files_c[0] = "Escher_out_SIMD.raw";
     output_files_c[1] = "kid_out_SIMD.raw";
-//    output_files_c[2] = "lena_gray_out_SIMD.raw";
+    output_files_c[2] = "lena_gray_out_SIMD.raw";
 
     // Process image with SIMD and calculate time
     tstart = clock();
