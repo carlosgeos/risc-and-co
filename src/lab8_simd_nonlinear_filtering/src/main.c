@@ -53,7 +53,7 @@ void process_image_simd(
             unsigned char *ptrin = malloc(sizes[i]*sizes[i]* sizeof(unsigned char));
             unsigned char *ptrout = malloc(sizes[i]*sizes[i]* sizeof(unsigned char));
 //            unsigned long ii = 1;
-            unsigned long ii = sizes[i]*sizes[i]/14;
+            unsigned long ii = (sizes[i]*sizes[i]-(2*sizes[i]))/14 ;
 
             // validate that there is enough memory
             if (ptrin == NULL || ptrout == NULL) {
@@ -74,11 +74,8 @@ void process_image_simd(
                 "l1: \n"
                     "movdqu     (%%rsi), %%xmm0\n"
                     "movdqu     %%xmm0, %%xmm3\n"
-                    "add        $1024, %%rsi\n"
                     "movdqu     1024(%%rsi), %%xmm1\n"
-                    "add        $1024, %%rsi\n"
                     "movdqu     2048(%%rsi), %%xmm2\n"
-                    "sub        $2048, %%rsi\n"
                     "pmaxub     %%xmm1, %%xmm0\n" // Calculate max
                     "pmaxub     %%xmm2, %%xmm0\n"
                     "pminub     %%xmm1, %%xmm3\n" // Calculate Min
