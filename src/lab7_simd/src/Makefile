@@ -11,7 +11,7 @@ FILES=$(wildcard ${SRC}*.c)
 OBJS=$(subst .c,.o,$(FILES))
 
 %.o: %.c
-		$(CC) -c $(CFLAGS) $(NO_EXTENDED_IS_FLAGS) -o $@ $<
+		$(CC) -c $(CFLAGS) -march=corei7 -o $@ $<
 
 simd:	$(OBJS)
 		$(CC) -o $@ $(OBJS) $(LDFLAGS)

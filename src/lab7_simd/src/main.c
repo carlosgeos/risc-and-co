@@ -20,7 +20,8 @@ void process_image_simd(
             // initialize source/destination/counter/threeshold variables
             unsigned char *ptrin = malloc(sizes[i]*sizes[i]* sizeof(unsigned char));
             unsigned char *ptrout = malloc(sizes[i]*sizes[i]* sizeof(unsigned char));
-            unsigned int ii = sizes[i]*sizes[i]/16;
+//            unsigned long ii = 1;
+            unsigned long ii = sizes[i]*sizes[i]/16;
             unsigned char *mask = malloc(16 * sizeof(unsigned char));
 
             if (ptrin == NULL || ptrout == NULL || mask == NULL) {
@@ -37,23 +38,23 @@ void process_image_simd(
 
             // process input data with threeshold
             __asm__ (
-                    "mov        %1, %%esi\n"
-                    "mov        %2, %%ecx\n"
-                    "mov        %4, %%edi\n"
-                    "mov        %3, %%eax\n"
-                    "movdqu     (%%eax), %%xmm7\n"
+                    "mov        %1, %%rsi\n"
+                    "mov        %2, %%rcx\n"
+                    "mov        %4, %%rdi\n"
+                    "mov        %3, %%rax\n"
+                    "movdqu     (%%rax), %%xmm7\n"
                 "l1: \n"
-                    "movdqu     (%%esi), %%xmm0\n"
+                    "movdqu     (%%rsi), %%xmm0\n"
                     "pminub     %%xmm7, %%xmm0\n"
                     "pcmpeqb    %%xmm7, %%xmm0\n"
-                    "movdqu     %%xmm0, (%%edi)\n"
-                    "add        $16, %%edi\n"
-                    "add        $16, %%esi\n"
-                    "sub        $1,  %%ecx\n"
+                    "movdqu     %%xmm0, (%%rdi)\n"
+                    "add        $16, %%rdi\n"
+                    "add        $16, %%rsi\n"
+                    "sub        $1,  %%rcx\n"
                 "jnz l1 \n"
                     : "=m" (ptrout) // output
-                    : "g" (ptrin), "g" (ii), "g" (mask), "g" (ptrout)  // inputs
-                    : "esi", "ecx", "eax", "edi", "xmm7", "xmm0" // clobbers
+                    : "g" (ptrin), "g" (ii), "r" (mask), "g" (ptrout)  // inputs
+                    : "rsi", "rcx", "rax", "rdi", "xmm7", "xmm0" // clobbers
             );
 
             // write buffer data into output
