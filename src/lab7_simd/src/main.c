@@ -1,10 +1,44 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include <ctype.h>
 
+// FUNCTION DECLARATION:
+
+/**
+ * @param threshold
+ * @param input_files 
+ * @param output_files 
+ * @param number_images 
+ * @param sizes 
+ */
 void process_image_simd(
-        unsigned char threeshold,
+        unsigned char threshold,
+        char **input_files,
+        char **output_files,
+        unsigned char number_images,
+        unsigned int *sizes
+        );
+
+/**
+ * @param threshold 
+ * @param input_files 
+ * @param output_files 
+ * @param number_images 
+ * @param sizes 
+ */
+void process_images_c(
+        unsigned char threshold,
+        char **input_files,
+        char **output_files,
+        unsigned char number_images,
+        unsigned int *sizes
+        );
+
+
+
+// Function implementation
+void process_image_simd(
+        unsigned char threshold,
         char **input_files,
         char **output_files,
         unsigned char number_images,
@@ -17,13 +51,14 @@ void process_image_simd(
 
         if (input != NULL && output != NULL) {
 
-            // initialize source/destination/counter/threeshold variables
+            // initialize source/destination/counter/threshold variables
             unsigned char *ptrin = malloc(sizes[i]*sizes[i]* sizeof(unsigned char));
             unsigned char *ptrout = malloc(sizes[i]*sizes[i]* sizeof(unsigned char));
 //            unsigned long ii = 1;
             unsigned long ii = sizes[i]*sizes[i]/16;
             unsigned char *mask = malloc(16 * sizeof(unsigned char));
 
+            // validate that there is enough memory
             if (ptrin == NULL || ptrout == NULL || mask == NULL) {
                 printf("Memory left!");
             }
@@ -33,10 +68,10 @@ void process_image_simd(
 
             // load mask
             for (unsigned char j = 0; j < 16; j++) {
-                mask[j] = threeshold;
+                mask[j] = threshold;
             }
 
-            // process input data with threeshold
+            // process input data with threshold
             __asm__ (
                     "mov        %1, %%rsi\n"
                     "mov        %2, %%rcx\n"
@@ -73,8 +108,8 @@ void process_image_simd(
     }
 }
 
-void process_images(
-        unsigned char threeshold,
+void process_images_c(
+        unsigned char threshold,
         char **input_files,
         char **output_files,
         unsigned char number_images,
@@ -90,9 +125,9 @@ void process_images(
         unsigned char *buffer = malloc(sizes[i]*sizes[i]* sizeof(unsigned char));
         fread(buffer, sizeof(unsigned char), sizes[i]*sizes[i], input);
 
-        // process input data with threeshold
+        // process input data with threshold
         for (unsigned int k = 0; k < sizes[i] * sizes[i]; k++) {
-            if (buffer[k] < threeshold) {
+            if (buffer[k] < threshold) {
                 buffer[k] = 0;
             }
             else {
@@ -110,6 +145,12 @@ void process_images(
     }
 }
 
+/**
+ *
+ * @param argc
+ * @param argv
+ * @return
+ */
 int main(int argc, char* argv[]) {
     float time_c, time_simd;
     unsigned char number_images = 3;
@@ -120,21 +161,21 @@ int main(int argc, char* argv[]) {
 
     clock_t tstart, tend;
 
-    // Verify that the there is memory.
+    // Verify that there is enough memory.
     if (input_files == NULL || output_files_c == NULL || sizes == NULL) {
         printf("Out of memory");
         exit(1);
     }
 
     // Initialize input files
-    input_files[0] = "images/input/Escher.raw";
-    input_files[1] = "images/input/kid.raw";
-    input_files[2] = "images/input/lena_gray.raw";
+    input_files[0] = "Escher.raw";
+    input_files[1] = "kid.raw";
+    input_files[2] = "lena_gray.raw";
 
     // Initialize output files for C
-    output_files_c[0] = "images/output/Escher_out_C.raw";
-    output_files_c[1] = "images/output/kid_out_C.raw";
-    output_files_c[2] = "images/output/lena_gray_out_C.raw";
+    output_files_c[0] = "Escher_out_C.raw";
+    output_files_c[1] = "kid_out_C.raw";
+    output_files_c[2] = "lena_gray_out_C.raw";
 
     // Initialize size of files
     sizes[0] = 1024;
@@ -143,29 +184,28 @@ int main(int argc, char* argv[]) {
 
     // Process image with pure C and calculate time
     tstart = clock();
-    process_images(threshold, input_files, output_files_c, number_images, sizes);
+    process_images_c(threshold, input_files, output_files_c, number_images, sizes);
     tend = clock();
     time_c = (float)(tend - tstart) / CLOCKS_PER_SEC;
-    printf("\nTime spent: %f\n", time_c);
+    printf("\nTime spent C: %f\n", time_c);
 
     // Initialize output files for SIMD
-    output_files_c[0] = "images/output/Escher_out_SIMD.raw";
-    output_files_c[1] = "images/output/kid_out_SIMD.raw";
-    output_files_c[2] = "images/output/lena_gray_out_SIMD.raw";
+    output_files_c[0] = "Escher_out_SIMD.raw";
+    output_files_c[1] = "kid_out_SIMD.raw";
+    output_files_c[2] = "lena_gray_out_SIMD.raw";
 
     // Process image with SIMD and calculate time
     tstart = clock();
     process_image_simd(threshold, input_files, output_files_c, number_images, sizes);
     tend = clock();
     time_simd = (float)(tend - tstart) / CLOCKS_PER_SEC;
-    printf("\nTime spent: %f\n", time_simd);
+    printf("\nTime spent SIMD: %f\n", time_simd);
 
     // Free memory
     free(input_files);
     free(output_files_c);
     free(sizes);
 
-    (void)time_simd;
     (void)argc;
     (void)argv;
     return EXIT_SUCCESS;
