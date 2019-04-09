@@ -55,3 +55,6 @@ Mkfile.old
 dkms.conf
 
 filtering
+
+*_out_C.raw
+*_out_SIMD.raw

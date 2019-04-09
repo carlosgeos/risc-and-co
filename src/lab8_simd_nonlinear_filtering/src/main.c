@@ -70,7 +70,7 @@ void process_image_simd(char **input_files, char **output_files,
                 );
 
             // write buffer data into output
-            /* fwrite(ptrout, sizeof(unsigned char), output_size, output); */
+            fwrite(ptrout, sizeof(unsigned char), output_size, output);
 
             // free memory
             /* free(ptrout); */ // ERROR: munmap_chunk(): invalid pointer

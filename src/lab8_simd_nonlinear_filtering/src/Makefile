@@ -14,7 +14,7 @@ OBJS=$(subst .c,.o,$(FILES))
 %.o: %.c
 		$(CC) -c $(CFLAGS) -o $@ $<
 
-simd:	$(OBJS)
+filtering:	$(OBJS)
 		$(CC) -o $@ $(OBJS) $(LDFLAGS)
 
 clean:
