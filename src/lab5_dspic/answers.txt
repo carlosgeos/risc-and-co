@@ -84,8 +84,13 @@ c) There is an overflow when summing s1 and s2. See as a)
 	a = SR; // save LSByte of Status
 	if(a==0x0C)s3 = 127; //Overflow (bit2) and Negative (bit3)
 	if(a==0x05)s3 = -128;//Overflow (bit2) and Carry (bit1) // enters here!!!
+	
+d) This result is incorrect:
+	c = a*b;
+The result does not fit in type of variable of C which is INT8U resulting in 0x00 which of course is incorrect. This will work if c
+was declared as a INT16U data type where the result will be 0x200
 
-d) In case of the multiplication the result is not correct neither. There is an overflow in the multiplication. Even though the result is allocated into an int32 variable, overflow is not considered. That's why we need to cast first!
+e) In case of the multiplication the result is not correct neither. There is an overflow in the multiplication. Even though the result is allocated into an int32 variable, overflow is not considered. That's why we need to cast first!
 
 	h = e*f; //INT32U = INT16U * INT16U
 
